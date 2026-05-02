@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ellie's Race Prep — 800M · Wed 5/6</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #f8f7f4;
+    --surface:     #ffffff;
+    --surface2:    #f2f1ee;
+    --border:      rgba(0,0,0,0.09);
+    --border2:     rgba(0,0,0,0.16);
+    --text:        #1a1917;
+    --text2:       #5c5a56;
+    --text3:       #9c9a96;
+
+    --blue-bg:     #e8f1fb;
+    --blue-text:   #0d4a8a;
+    --blue-border: #a8c8f0;
+
+    --green-bg:    #e2f4ec;
+    --green-text:  #0d6640;
+    --green-border:#8ed4b0;
+
+    --amber-bg:    #fdf0da;
+    --amber-text:  #7a4a08;
+    --amber-border:#f5c878;
+
+    --purple-bg:   #efedfe;
+    --purple-text: #3d318c;
+    --purple-border:#c0b8f0;
+
+    --coral-bg:    #fceee9;
+    --coral-text:  #8a2e14;
+    --coral-border:#f4a88a;
+
+    --radius:      12px;
+    --radius-sm:   8px;
+    --radius-pill: 20px;
+
+    --tab-h:       52px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Sticky tab bar ───────────────────────────────────────────────────── */
+  .tab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(248,247,244,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border2);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: var(--tab-h);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid var(--border2);
+    color: var(--text2);
+    background: var(--surface);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+  }
+  .tab:hover { background: var(--surface2); }
+  .tab.active {
+    background: var(--blue-bg);
+    color: var(--blue-text);
+    border-color: var(--blue-border);
+  }
+  .tab.race-tab.active {
+    background: var(--coral-bg);
+    color: var(--coral-text);
+    border-color: var(--coral-border);
+  }
+
+  /* ── Page layout ──────────────────────────────────────────────────────── */
+  .page-header {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 16px 0;
+  }
+  .page-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+  .page-title {
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .page-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 4px;
+    margin-bottom: 24px;
+  }
+
+  .app {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  /* ── Day views ────────────────────────────────────────────────────────── */
+  .day-view { display: none; }
+  .day-view.visible { display: block; }
+
+  .day-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 3px;
+  }
+  .day-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .day-title span { flex: 1; }
+  .day-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 11px;
+    border-radius: var(--radius-pill);
+    margin-top: 3px;
+  }
+  .badge-rec    { background: var(--green-bg);  color: var(--green-text); }
+  .badge-rest   { background: var(--purple-bg); color: var(--purple-text); }
+  .badge-run    { background: var(--blue-bg);   color: var(--blue-text); }
+  .badge-sharp  { background: var(--amber-bg);  color: var(--amber-text); }
+  .badge-race   { background: var(--coral-bg);  color: var(--coral-text); }
+
+  /* ── Cards ────────────────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 14px 0;
+  }
+  .card-icon {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .icon-blue   { background: var(--blue-bg);   color: var(--blue-text); }
+  .icon-green  { background: var(--green-bg);  color: var(--green-text); }
+  .icon-amber  { background: var(--amber-bg);  color: var(--amber-text); }
+  .icon-purple { background: var(--purple-bg); color: var(--purple-text); }
+  .icon-coral  { background: var(--coral-bg);  color: var(--coral-text); }
+
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .card-body  { padding: 10px 14px 14px; }
+
+  /* ── Timeline ─────────────────────────────────────────────────────────── */
+  .timeline { display: flex; flex-direction: column; }
+  .trow {
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .trow:last-child { border-bottom: none; }
+  .ttime {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    padding-top: 1px;
+    line-height: 1.4;
+  }
+  .ttext {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.55;
+  }
+  .ttext strong { color: var(--text); font-weight: 500; }
+
+  /* ── Urine chips ──────────────────────────────────────────────────────── */
+  .urine-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 9px;
+  }
+  .urine-label { font-size: 11px; color: var(--text3); }
+  .chip {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-weight: 500;
+  }
+  .chip-green  { background: var(--green-bg);  color: var(--green-text); }
+  .chip-amber  { background: var(--amber-bg);  color: var(--amber-text); }
+  .chip-coral  { background: var(--coral-bg);  color: var(--coral-text); }
+
+  /* ── Total bar ────────────────────────────────────────────────────────── */
+  .total-bar {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    background: var(--surface2);
+    border-top: 0.5px solid var(--border);
+    margin: 10px -14px -14px;
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  .total-label { font-size: 12px; color: var(--text2); }
+  .total-val {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Meal grid ────────────────────────────────────────────────────────── */
+  .meal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .meal-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+  }
+  .meal-card.full { grid-column: 1 / -1; }
+  .meal-lbl {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 3px;
+  }
+  .meal-food {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .meal-note {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* ── Checklist ────────────────────────────────────────────────────────── */
+  .checklist { display: flex; flex-direction: column; gap: 6px; }
+  .check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .check-label input[type="checkbox"] { display: none; }
+  .cbox {
+    width: 18px; height: 18px; min-width: 18px;
+    border-radius: 5px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    margin-top: 0px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check-label input:checked + .cbox {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+  }
+  .check-label input:checked + .cbox::after {
+    content: '';
+    display: block;
+    width: 10px; height: 7px;
+    border-left: 1.5px solid var(--green-text);
+    border-bottom: 1.5px solid var(--green-text);
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .ctext {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    padding-top: 1px;
+    transition: color 0.15s;
+  }
+  .check-label input:checked ~ .ctext {
+    color: var(--text3);
+    text-decoration: line-through;
+  }
+
+  /* ── Snack grid ───────────────────────────────────────────────────────── */
+  .sub-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 12px 0 6px;
+  }
+  .snack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .snack-chip {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.45;
+  }
+  .snack-chip strong {
+    color: var(--text);
+    font-weight: 500;
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  /* ── Race banner ──────────────────────────────────────────────────────── */
+  .race-banner {
+    background: var(--coral-bg);
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--coral-border);
+    padding: 12px 13px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--coral-text);
+    line-height: 1.65;
+    font-weight: 500;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────────────────── */
+  @media (max-width: 480px) {
+    .meal-grid   { grid-template-columns: 1fr; }
+    .snack-grid  { grid-template-columns: 1fr; }
+    .trow        { grid-template-columns: 68px 1fr; }
+    .page-title  { font-size: 22px; }
+    .tab         { font-size: 12px; padding: 6px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sticky tab bar -->
+<div class="tab-bar">
+  <div class="tab active"   onclick="showDay('fri',this)">Fri 5/1</div>
+  <div class="tab"          onclick="showDay('sat',this)">Sat 5/2</div>
+  <div class="tab"          onclick="showDay('sun',this)">Sun 5/3</div>
+  <div class="tab"          onclick="showDay('mon',this)">Mon 5/4</div>
+  <div class="tab"          onclick="showDay('tue',this)">Tue 5/5</div>
+  <div class="tab race-tab" onclick="showDay('wed',this)">Wed 5/6 — Race</div>
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-eyebrow">Race prep guide</div>
+  <div class="page-title">Ellie's 800M plan</div>
+  <div class="page-sub">Friday 5/1 through Wednesday 5/6 &middot; Race @ 4:30pm</div>
+</div>
+
+<div class="app">
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       FRIDAY
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="day-view visible" id="day-fri">
+    <div class="day-eyebrow">Friday 5/1 &middot; Tonight</div>
+    <div class="day-title">
+      <span>PR day — recovery starts now</span>
+      <div class="day-badge badge-rest">Recovery</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-blue">H</div>
+        <div class="card-title">Hydration checkpoints</div>
+      </div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Right now</div><div class="ttext"><strong>16 oz</strong> — drink a full glass immediately</div></div>
+          <div class="trow"><div class="ttime">With dinner</div><div class="ttext"><strong>8–12 oz</strong> — sip with your meal, don't chug</div></div>
+          <div class="trow"><div class="ttime">Before bed</div><div class="ttext"><strong>8 oz</strong> — small glass only</div></div>
+        </div>
+        <div class="urine-row">
+          <span class="urine-label">Urine check:</span>
+          <span class="chip chip-green">Pale yellow = perfect</span>
+          <span class="chip chip-amber">Dark yellow = drink more</span>
+          <span class="chip chip-coral">Orange = dehydrated</span>
+        </div>
+        <div class="total-bar">
+          <span class="total-label">Tonight's total target</span>
+          <span class="total-val">~32–36 oz</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-green">F</div>
+        <div class="card-title">Dinner — from your kitchen</div>
+      </div>
+      <div class="card-body">
+        <div class="meal-grid">
+          <div class="meal-card"><div class="meal-lbl">Protein</div><div class="meal-food">Ground venison or beef</div><div class="meal-note">4–6 oz — iron + recovery</div></div>
+          <div class="meal-card"><div class="meal-lbl">Carbs</div><div class="meal-food">Jasmine rice</div><div class="meal-note">1 cup cooked — refill glycogen</div></div>
+          <div class="meal-card"><div class="meal-lbl">Fat</div><div class="meal-food">Avocado pack</div><div class="meal-note">1 pack — anti-inflammatory</div></div>
+          <div class="meal-card"><div class="meal-lbl">Extra</div><div class="meal-food">Berries or banana</div><div class="meal-note">If still hungry after</div></div>
+          <div class="meal-card full"><div class="meal-lbl">Before bed (optional)</div><div class="meal-food">Greek yogurt — 1/2 cup</div><div class="meal-note">Casein protein repairs muscle while you sleep</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-purple">Z</div>
+        <div class="card-title">Sleep — most important night of the week</div>
+      </div>
+      <div class="card-body">
+        <div class="checklist">
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Screens off by 8:30–9pm</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Room temp at 65–68°F if possible</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Lights out by 9:30–10pm</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Target 9–9.5 hrs of sleep</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SATURDAY
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="day-view" id="day-sat">
+    <div class="day-eyebrow">Saturday 5/2 &middot; Form day</div>
+    <div class="day-title">
+      <span>Easy run + drills + strides</span>
+      <div class="day-badge badge-rec">Form day</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-blue">H</div><div class="card-title">Hydration — full day schedule</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Wake up</div><div class="ttext"><strong>16 oz immediately</strong> — before anything else</div></div>
+          <div class="trow"><div class="ttime">Pre-run</div><div class="ttext"><strong>8 oz</strong> — 30 min before you head out</div></div>
+          <div class="trow"><div class="ttime">Post-run</div><div class="ttext"><strong>16–20 oz</strong> — within 20 min of finishing</div></div>
+          <div class="trow"><div class="ttime">Mid-morning</div><div class="ttext"><strong>8–12 oz</strong> — around 10am with snack</div></div>
+          <div class="trow"><div class="ttime">Lunch</div><div class="ttext"><strong>12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">Afternoon</div><div class="ttext"><strong>12–16 oz</strong> — sip steadily between 2–5pm</div></div>
+          <div class="trow"><div class="ttime">Dinner</div><div class="ttext"><strong>8–12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">Before bed</div><div class="ttext"><strong>8 oz</strong> — small glass only</div></div>
+        </div>
+        <div class="urine-row">
+          <span class="urine-label">Urine check:</span>
+          <span class="chip chip-green">Pale yellow = on track</span>
+          <span class="chip chip-amber">Dark yellow = drink more</span>
+        </div>
+        <div class="total-bar"><span class="total-label">Daily total target</span><span class="total-val">80–96 oz</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-amber">R</div><div class="card-title">Training</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Morning</div><div class="ttext"><strong>20 min easy jog</strong> — go early before it heats up. Conversational pace the whole time.</div></div>
+          <div class="trow"><div class="ttime">After jog</div><div class="ttext"><strong>Drills</strong> — A-skips, B-skips, high knees, butt kicks. 2 sets &times; 20m each.</div></div>
+          <div class="trow"><div class="ttime">After drills</div><div class="ttext"><strong>4 &times; 80m strides</strong> — smooth acceleration to race-feel. Not a sprint. Full rest between each.</div></div>
+          <div class="trow"><div class="ttime">Afternoon</div><div class="ttext"><strong>15 min stretch</strong> — hips, hamstrings, calves. Foam roll if you have one.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-green">F</div><div class="card-title">Meals</div></div>
+      <div class="card-body">
+        <div class="meal-grid">
+          <div class="meal-card"><div class="meal-lbl">Breakfast</div><div class="meal-food">2–3 eggs + banana</div><div class="meal-note">+ Greek yogurt on the side</div></div>
+          <div class="meal-card"><div class="meal-lbl">Pre-run snack</div><div class="meal-food">Banana</div><div class="meal-note">45 min before the run</div></div>
+          <div class="meal-card"><div class="meal-lbl">Post-run</div><div class="meal-food">Greek yogurt + fruit</div><div class="meal-note">Within 30 min of finishing</div></div>
+          <div class="meal-card"><div class="meal-lbl">Dinner</div><div class="meal-food">Ground meat + jasmine rice</div><div class="meal-note">+ avocado pack + lettuce</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SUNDAY
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="day-view" id="day-sun">
+    <div class="day-eyebrow">Sunday 5/3 &middot; Rest day</div>
+    <div class="day-title">
+      <span>Mental rehearsal + full recovery</span>
+      <div class="day-badge badge-rest">Easy day</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-blue">H</div><div class="card-title">Hydration — full day schedule</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Wake up</div><div class="ttext"><strong>16 oz immediately</strong></div></div>
+          <div class="trow"><div class="ttime">Mid-morning</div><div class="ttext"><strong>12 oz</strong> — around 9–10am</div></div>
+          <div class="trow"><div class="ttime">Lunch</div><div class="ttext"><strong>12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">Afternoon</div><div class="ttext"><strong>16 oz</strong> — sip steadily 1–4pm</div></div>
+          <div class="trow"><div class="ttime">Dinner</div><div class="ttext"><strong>12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">Before bed</div><div class="ttext"><strong>8 oz</strong></div></div>
+        </div>
+        <div class="urine-row">
+          <span class="urine-label">Urine check:</span>
+          <span class="chip chip-green">Pale yellow = perfect</span>
+          <span class="chip chip-amber">Dark yellow = drink more</span>
+        </div>
+        <div class="total-bar"><span class="total-label">Daily total target</span><span class="total-val">76–88 oz</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-purple">M</div><div class="card-title">Mental work — 800M visualization</div></div>
+      <div class="card-body">
+        <div class="checklist">
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Close eyes — see yourself at the start line, calm and ready</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">First 200M: controlled, not chasing anyone, smooth arm drive</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">400M mark: you still have legs — you're in position</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">550–600M: you make your move — you committed</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Last 150M: it hurts — that's normal. Drive arms. Stay tall. Lean.</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Write down 3 process goals (not a time goal)</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-green">F</div><div class="card-title">Meals + sleep</div></div>
+      <div class="card-body">
+        <div class="meal-grid">
+          <div class="meal-card"><div class="meal-lbl">Breakfast</div><div class="meal-food">Eggs + banana + yogurt</div><div class="meal-note">Normal healthy morning</div></div>
+          <div class="meal-card"><div class="meal-lbl">Snack</div><div class="meal-food">Greek yogurt + berries</div><div class="meal-note">Mid-afternoon</div></div>
+          <div class="meal-card"><div class="meal-lbl">Dinner</div><div class="meal-food">Ground meat + rice + avocado</div><div class="meal-note">Start eating slightly more carbs</div></div>
+          <div class="meal-card"><div class="meal-lbl">Sleep</div><div class="meal-food">8.5–9 hrs</div><div class="meal-note">Lights out 9:30pm</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       MONDAY
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="day-view" id="day-mon">
+    <div class="day-eyebrow">Monday 5/4 &middot; School day</div>
+    <div class="day-title">
+      <span>20-min maintenance run</span>
+      <div class="day-badge badge-run">Easy run</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-blue">H</div><div class="card-title">Hydration — timed to school + practice</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Wake up</div><div class="ttext"><strong>16 oz before breakfast</strong> — non-negotiable start</div></div>
+          <div class="trow"><div class="ttime">Breakfast</div><div class="ttext"><strong>8 oz</strong> — with your meal</div></div>
+          <div class="trow"><div class="ttime">To school</div><div class="ttext"><strong>Fill a 20–24 oz bottle</strong> — bring it, finish it by lunch</div></div>
+          <div class="trow"><div class="ttime">Lunch</div><div class="ttext"><strong>12 oz</strong> — with meal at school</div></div>
+          <div class="trow"><div class="ttime">After lunch</div><div class="ttext"><strong>Fill bottle again</strong> — 20 oz, sip through afternoon classes</div></div>
+          <div class="trow"><div class="ttime">Pre-run</div><div class="ttext"><strong>8 oz</strong> — 30 min before practice. No chugging.</div></div>
+          <div class="trow"><div class="ttime">Post-run</div><div class="ttext"><strong>16–20 oz</strong> — replace sweat, within 20 min of finishing</div></div>
+          <div class="trow"><div class="ttime">Dinner</div><div class="ttext"><strong>12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">Before bed</div><div class="ttext"><strong>8 oz</strong></div></div>
+        </div>
+        <div class="urine-row">
+          <span class="urine-label">Urine check:</span>
+          <span class="chip chip-green">Pale yellow = on track</span>
+          <span class="chip chip-amber">Dark = behind, catch up slowly</span>
+        </div>
+        <div class="total-bar"><span class="total-label">Daily total target</span><span class="total-val">100–110 oz</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-amber">R</div><div class="card-title">Training</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Warm-up</div><div class="ttext">5 min walk-to-jog transition</div></div>
+          <div class="trow"><div class="ttime">Main</div><div class="ttext"><strong>20 min easy run</strong> — hold a conversation the whole time. RPE 4–5/10. Nothing more.</div></div>
+          <div class="trow"><div class="ttime">After</div><div class="ttext"><strong>4 &times; 60m strides</strong> — smooth acceleration to race-feel. Full rest between each.</div></div>
+          <div class="trow"><div class="ttime">Cool-down</div><div class="ttext">10 min stretch — calves, quads, hip flexors</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-green">F</div><div class="card-title">Meals + school lunch call</div></div>
+      <div class="card-body">
+        <div class="meal-grid">
+          <div class="meal-card"><div class="meal-lbl">Breakfast</div><div class="meal-food">2–3 eggs + banana + rice</div><div class="meal-note">Small rice portion</div></div>
+          <div class="meal-card"><div class="meal-lbl">School lunch</div><div class="meal-food">Chicken wrap + peaches</div><div class="meal-note">Best option — skip pizza/nuggets</div></div>
+          <div class="meal-card"><div class="meal-lbl">Pre-practice</div><div class="meal-food">Banana</div><div class="meal-note">45 min before practice</div></div>
+          <div class="meal-card"><div class="meal-lbl">Dinner</div><div class="meal-food">Ground meat + big rice portion</div><div class="meal-note">Carb-load begins — eat more</div></div>
+        </div>
+        <div class="sub-label">Pack for school</div>
+        <div class="snack-grid">
+          <div class="snack-chip"><strong>Option A</strong>Greek yogurt cup + banana</div>
+          <div class="snack-chip"><strong>Option B</strong>2 hard-boiled eggs + banana</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       TUESDAY
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="day-view" id="day-tue">
+    <div class="day-eyebrow">Tuesday 5/5 &middot; School day &middot; Last hard session</div>
+    <div class="day-title">
+      <span>Speed sharpening — 400s or 200s</span>
+      <div class="day-badge badge-sharp">Sharpening</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-blue">H</div><div class="card-title">Hydration — timed to school + practice</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Wake up</div><div class="ttext"><strong>16 oz before breakfast</strong></div></div>
+          <div class="trow"><div class="ttime">Breakfast</div><div class="ttext"><strong>8 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">To school</div><div class="ttext"><strong>20–24 oz bottle</strong> — finish by lunch. Sip consistently, don't gulp.</div></div>
+          <div class="trow"><div class="ttime">Lunch</div><div class="ttext"><strong>12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">After lunch</div><div class="ttext"><strong>20 oz</strong> — second bottle, sip through afternoon</div></div>
+          <div class="trow"><div class="ttime">Pre-practice</div><div class="ttext"><strong>8 oz</strong> — 30–45 min before. Add electrolyte tab if it's warm.</div></div>
+          <div class="trow"><div class="ttime">During</div><div class="ttext"><strong>4–6 oz per rest interval</strong> — small sips between reps, not big gulps</div></div>
+          <div class="trow"><div class="ttime">Post-practice</div><div class="ttext"><strong>20 oz</strong> — within 20 min of finishing</div></div>
+          <div class="trow"><div class="ttime">Dinner</div><div class="ttext"><strong>12 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">Before bed</div><div class="ttext"><strong>8 oz</strong> — last glass</div></div>
+        </div>
+        <div class="urine-row">
+          <span class="urine-label">Urine check:</span>
+          <span class="chip chip-green">Pale yellow all day = on track</span>
+          <span class="chip chip-coral">Dark after practice = drink more post-run</span>
+        </div>
+        <div class="total-bar"><span class="total-label">Daily total target</span><span class="total-val">108–120 oz</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-amber">R</div><div class="card-title">Training — what to expect at practice</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Warm-up</div><div class="ttext">10 min easy jog + full drill set</div></div>
+          <div class="trow"><div class="ttime">Main set</div><div class="ttext"><strong>3 &times; 400M at goal 800 race pace</strong> — full 3 min rest between each. OR 4 &times; 200M slightly faster, 90 sec rest.</div></div>
+          <div class="trow"><div class="ttime">Key rule</div><div class="ttext">Do not add reps. Each one should feel sharp, not desperate. Quality wins.</div></div>
+          <div class="trow"><div class="ttime">Cool-down</div><div class="ttext">10 min easy jog + full stretch</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-green">F</div><div class="card-title">Meals + school lunch call</div></div>
+      <div class="card-body">
+        <div class="meal-grid">
+          <div class="meal-card"><div class="meal-lbl">Breakfast</div><div class="meal-food">2–3 eggs + banana + rice</div><div class="meal-note">More carbs today than usual</div></div>
+          <div class="meal-card"><div class="meal-lbl">School lunch</div><div class="meal-food">Chicken wrap + peaches or pears</div><div class="meal-note">Eat by 12:30 — 3 hrs before practice</div></div>
+          <div class="meal-card"><div class="meal-lbl">Pre-practice</div><div class="meal-food">Banana or a few dates</div><div class="meal-note">45 min out — fast carbs only</div></div>
+          <div class="meal-card"><div class="meal-lbl">Post-practice</div><div class="meal-food">Greek yogurt + banana</div><div class="meal-note">Within 30 min — protein + carbs</div></div>
+          <div class="meal-card full"><div class="meal-lbl">Dinner — carb-load meal</div><div class="meal-food">Jasmine rice (generous) + ground meat + avocado + lettuce</div><div class="meal-note">Eat more rice than usual. Light snack before bed if hungry — yogurt or banana.</div></div>
+        </div>
+        <div class="sub-label">Pack for school</div>
+        <div class="snack-grid">
+          <div class="snack-chip"><strong>Option A</strong>Greek yogurt + banana</div>
+          <div class="snack-chip"><strong>Option B</strong>2 hard-boiled eggs + avocado pack</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-purple">N</div><div class="card-title">Tonight — final prep checklist</div></div>
+      <div class="card-body">
+        <div class="checklist">
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Lay out race kit, shoes, spikes, and warm-ups tonight</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Write your race plan: what will you do at 200M, 400M, 550M, last 150M?</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Pack race day bag: banana, dates, full water bottle</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Lights out by 9pm — you need 8.5 hrs</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       WEDNESDAY — RACE DAY
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="day-view" id="day-wed">
+    <div class="day-eyebrow">Wednesday 5/6 &middot; Race @ 4:30pm</div>
+    <div class="day-title">
+      <span>Race day — 800M</span>
+      <div class="day-badge badge-race">Race day</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-blue">H</div><div class="card-title">Hydration — timed to the race</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">Wake up</div><div class="ttext"><strong>16 oz immediately</strong> — before breakfast, first thing</div></div>
+          <div class="trow"><div class="ttime">Breakfast</div><div class="ttext"><strong>8 oz</strong> — with meal</div></div>
+          <div class="trow"><div class="ttime">School AM</div><div class="ttext"><strong>20–24 oz</strong> — bring a bottle, finish it by 11am</div></div>
+          <div class="trow"><div class="ttime">Lunch</div><div class="ttext"><strong>12 oz</strong> — with meal. This is your last big fluid push.</div></div>
+          <div class="trow"><div class="ttime">1–3pm</div><div class="ttext"><strong>Sip only — 8–12 oz total</strong> — slow it down now. No chugging pre-race.</div></div>
+          <div class="trow"><div class="ttime">3pm</div><div class="ttext"><strong>4–6 oz</strong> — last sip before warm-up. Add electrolyte tab if it's warm.</div></div>
+          <div class="trow"><div class="ttime">Warm-up</div><div class="ttext"><strong>No drinking</strong> during the jog. Small sip after strides only.</div></div>
+          <div class="trow"><div class="ttime">Post-race</div><div class="ttext"><strong>16–20 oz</strong> — rehydrate immediately after crossing the line</div></div>
+        </div>
+        <div class="urine-row">
+          <span class="urine-label">Race day target:</span>
+          <span class="chip chip-green">Pale yellow at noon = perfectly loaded</span>
+          <span class="chip chip-amber">Clear = ease off, slightly overhydrated</span>
+        </div>
+        <div class="total-bar"><span class="total-label">Total before the gun</span><span class="total-val">~80–88 oz by 3pm</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-green">F</div><div class="card-title">Meals — familiar foods only today</div></div>
+      <div class="card-body">
+        <div class="meal-grid">
+          <div class="meal-card"><div class="meal-lbl">Breakfast (7–7:30am)</div><div class="meal-food">Eggs + jasmine rice + banana</div><div class="meal-note">Avocado pack optional — small amount</div></div>
+          <div class="meal-card"><div class="meal-lbl">School lunch (~noon)</div><div class="meal-food">Chicken wrap + peaches or pears</div><div class="meal-note">Nothing fried. Nothing new today.</div></div>
+          <div class="meal-card"><div class="meal-lbl">2:30–3pm snack</div><div class="meal-food">Banana or a few dates</div><div class="meal-note">Last fuel before race — fast carbs only</div></div>
+          <div class="meal-card"><div class="meal-lbl">Post-race</div><div class="meal-food">Greek yogurt + banana + water</div><div class="meal-note">Recovery starts immediately</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-amber">R</div><div class="card-title">Warm-up — 3:45 to 4:20pm</div></div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="trow"><div class="ttime">3:45pm</div><div class="ttext">10 min easy jog — just getting loose, conversational pace</div></div>
+          <div class="trow"><div class="ttime">3:55pm</div><div class="ttext">Full drill set — A-skips, high knees, butt kicks, leg swings, hip circles</div></div>
+          <div class="trow"><div class="ttime">4:05pm</div><div class="ttext"><strong>2 &times; 150m strides at race pace</strong> — sharp but controlled. Full rest between.</div></div>
+          <div class="trow"><div class="ttime">4:15pm</div><div class="ttext">Stay warm — keep moving, add a layer if it cools down</div></div>
+          <div class="trow"><div class="ttime">4:20pm</div><div class="ttext">Lock in the plan. Breathe. You've done the work.</div></div>
+        </div>
+        <div class="race-banner">
+          Race plan: First 200M controlled — don't chase. Hit 400M still in control with gears left. Make your move at 550–600M. Last 150M: drive the arms, stay tall, lean at the line. It will hurt. That's the race. Run through it.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon icon-purple">W</div><div class="card-title">Race day checklist</div></div>
+      <div class="card-body">
+        <div class="checklist">
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Race kit, spikes, and warm-ups packed</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Banana and dates in bag for pre-race fuel</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Full water bottle — bring electrolyte tab if it's warm</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Race plan written and memorized: 200M, 400M, 550M, last 150M</span></label>
+          <label class="check-label"><input type="checkbox"><div class="cbox"></div><span class="ctext">Warm-up started by 3:45pm</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+  function showDay(id, el) {
+    document.querySelectorAll('.day-view').forEach(d => d.classList.remove('visible'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('day-' + id).classList.add('visible');
+    el.classList.add('active');
+    // scroll active tab into view in the tab bar
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    // scroll page to top of content
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
